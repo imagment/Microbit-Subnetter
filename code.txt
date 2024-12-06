@@ -5,7 +5,7 @@ ipAddress |= binaryArray[i];
     }
     return ipAddress
 }
-// t=
+
 function convertToNetmask (netmask: number) {
     return "" + (netmask >>> 24) + "." + ((netmask >> 16) & 255) + "." + ((netmask >> 8) & 255) + "." + (netmask & 255)
 }
