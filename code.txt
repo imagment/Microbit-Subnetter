@@ -1,0 +1,143 @@
+function convertBinaryToIPAddress (binaryArray: any[]) {
+    for (let i = 0; i <= binaryArray.length - 1; i++) {
+        ipAddress <<= 1;
+ipAddress |= binaryArray[i];
+    }
+    return ipAddress
+}
+// t=
+function convertToNetmask (netmask: number) {
+    return "" + (netmask >>> 24) + "." + ((netmask >> 16) & 255) + "." + ((netmask >> 8) & 255) + "." + (netmask & 255)
+}
+input.onButtonPressed(Button.A, function () {
+    if (number_of_blocks < 4) {
+        led.plotBrightness(r % 5, r / 5, 47)
+        r += 1
+        ipList.push(0)
+        f = f / 2
+        if (r == 8) {
+            basic.showLeds(`
+                . # # # .
+                . . # . .
+                . . # . .
+                . . # . .
+                . # # # .
+                `)
+            f = 128
+            basic.showString("" + (block))
+            basic.pause(1000)
+            basic.clearScreen()
+            ipAddress2 = convertBinaryToIPAddress(ipList)
+            number_of_blocks += 1
+            block = 0
+            r = 0
+        }
+    }
+})
+// Convert a 32-bit address to a human-readable string and display it on the micro:bit LED screen
+function showConvertedAddress (address: number) {
+    basic.showString("" + (convertToIPAddress(address)))
+    basic.clearScreen()
+}
+function calculateNetmask (network: number) {
+    return 0xFFFFFFFF << (32 - network)
+}
+input.onButtonPressed(Button.B, function () {
+    if (number_of_blocks < 4) {
+        led.plotBrightness(r % 5, r / 5, 255)
+        block += f
+        ipList.push(1)
+        r += 1
+        f = f / 2
+        if (r == 8) {
+            basic.showLeds(`
+                . # # # .
+                . . # . .
+                . . # . .
+                . . # . .
+                . # # # .
+                `)
+            f = 128
+            basic.showString("" + (block))
+            basic.pause(1000)
+            basic.clearScreen()
+            number_of_blocks += 1
+            block = 0
+            r = 0
+            ipAddress2 = convertBinaryToIPAddress(ipList)
+        }
+    }
+})
+function binaryListToNumber (binaryArray: any[]) {
+    return parseInt(binaryArray.join(''), 2)
+}
+function convertToIPAddress (ip: number) {
+    return "" + (ip >>> 24) + "." + ((ip >> 16) & 255) + "." + ((ip >> 8) & 255) + "." + (ip & 255)
+}
+let block = 0
+let ipList: number[] = []
+let number_of_blocks = 0
+let r = 0
+let f = 0
+let firstUsableIP = 0
+let netmask = 0
+let network = 0
+let binaryString = ""
+let ipAddress2 = 0
+let networkAddress = 0
+let broadcastAddress = 0
+let netmask2 = 0
+let ipAddress = 0
+f = 128
+r = 0
+number_of_blocks = 0
+basic.forever(function () {
+    if (number_of_blocks == 4) {
+        network = 0
+        basic.showLeds(`
+            . . . . #
+            . . . # .
+            # . # . .
+            . # . . .
+            . . . . .
+            `)
+        network = 24
+        while (!(input.buttonIsPressed(Button.AB))) {
+            if (input.buttonIsPressed(Button.A)) {
+                network += 1
+                basic.showString("" + (network))
+                if (32 < network) {
+                    network = 32
+                }
+            }
+            if (input.buttonIsPressed(Button.B)) {
+                network += -1
+                basic.showString("" + (network))
+                if (1 > network) {
+                    network = 1
+                }
+            }
+            if (input.logoIsPressed()) {
+                network = 24
+                basic.showString("" + (network))
+            }
+        }
+        basic.clearScreen()
+        basic.pause(5000)
+        basic.showString("Hosts:")
+        basic.showString("" + (network))
+        basic.showNumber(2 ** (32 - network) - 2)
+        basic.pause(2000)
+        basic.clearScreen()
+        basic.showString("Netmask:")
+        netmask2 = calculateNetmask(network)
+        basic.showString("" + (convertToNetmask(netmask2)))
+        basic.clearScreen()
+        broadcastAddress = ipAddress2 | (2 ** (32 - network) - 1);
+basic.showString("Broadcast:")
+        showConvertedAddress(broadcastAddress)
+        networkAddress = ipAddress2 & netmask2;
+basic.showString("Network:")
+        showConvertedAddress(networkAddress)
+    }
+})
